@@ -3,6 +3,7 @@
 Quick (actually very long) remainder how to setup a jetson nano
 
 ## Hardware
+---
 
 What you actually need as material
 
@@ -14,11 +15,12 @@ What you actually need as material
 
 + [Micro SD](https://www.sandisk.com/home/memory-cards/microsd-cards/extreme-microsd) (At least 32G)
 
-+ Standard Computer Jumper Caps]
++ Standard Computer Jumper Caps
 
-+ A micro USB to cable
++ A micro USB cable
 
 ## Preparing the kit
+---
 
 You only need to put the kit together if you want you can follow the tutorials
 
@@ -27,6 +29,7 @@ You only need to put the kit together if you want you can follow the tutorials
 + [For use the barrel adapter](https://www.jetsonhacks.com/2019/04/10/jetson-nano-use-more-power/)
 
 ## Image and connection to the wifi
+---
 
 For the image and the WIFI we are going to use the [jetcard](https://github.com/NVIDIA-AI-IOT/jetcard) image and almost the same procedure that the [jetracer software](https://github.com/NVIDIA-AI-IOT/jetracer/blob/master/docs/software_setup.md) 
 
@@ -64,7 +67,7 @@ For the image and the WIFI we are going to use the [jetcard](https://github.com/
     ```
 3. Connect to  the selected WiFi network
 
-    >  It should be on the same network that you will be webprogramming from
+    >  It should be on the same network that you will be connect to jetson
 
     ```bash
     sudo nmcli device wifi connect <ssid_name> password <password>
@@ -91,3 +94,70 @@ For the image and the WIFI we are going to use the [jetcard](https://github.com/
     ssh jetson@<jetson_ip_address>
     ```
 4. Sign in with the password ``jetson``
+
+## Intalling librealsense and ros
+---
+### Step 1 Realsense setup
+
+> To install librealsense you only need to use the utility scripts of jetson hacks for the [435D](https://www.jetsonhacks.com/2019/05/07/jetson-nano-realsense-tracking-camera/) or for the [265T](https://www.jetsonhacks.com/2019/05/16/jetson-nano-realsense-depth-camera/) they basically tell you to run the follow commands
+
+1. Add a swapfile to jetson
+
+    ```bash
+    git clone https://github.com/jetsonhacksnano/installSwapfile
+    cd installSwapfile
+    ./installSwapfile.sh
+    cd ..
+    ```
+
+2. Install librealsense with the utility script
+    ```bash
+    git clone https://github.com/jetsonhacksnano/installLibrealsense
+    cd installLibrealsense
+    ./installLibrealsense.sh -c
+    ./patchUbuntu.sh
+    cd ..
+    ```
+
+### Step 2 ROS setup
+
+> [ROS](https://github.com/JetsonHacksNano/installROS) and [RealsenseROS](https://github.com/JetsonHacksNano/installRealSenseROS) also have utility scripts you can run the ROS one with the follow commands
+
+1. Install librealsense with the utility script
+    ```bash
+    git clone https://github.com/JetsonHacksNano/installROS
+    cd installROS
+    ./installROS.sh -p ros-melodic-desktop -p ros-melodic-rgbd-launch
+    cd ..
+    ```
+### Step 3 Realsense ROS setup
+
+> Jetson Hacks provide a script to make a catkin workspace that use catkin_make as the script to install realsense ROS support also catkin tools we going to create the workspace using catkin tools
+
+1. Install catkin tools
+
+    ```bash
+    sudo apt-get install python-catkin-tools python-rosinstall-generator -y
+    ```
+2. Create the workspace for realsense ROS
+
+    ```bash
+    mkdir -p ~/catkin_ws_realsense/src
+    cd ~/catkin_ws_realsense
+    catkin init
+    cd ..
+    ```
+3. Install realsense ROS with the utility script
+
+    ```bash
+    git clone https://github.com/JetsonHacksNano/installRealSenseROS
+    cd installRealSenseROS
+    ./installRealSenseROS.sh catkin_ws_realsense
+    ./setupNano.sh
+    cd ..
+    ```
+4. Add the workspace to the PATH and the .bashrc file
+
+    ```bash
+    echo "source catkin_ws_realsense/devel/setup.bash --extend" >> ~/.bashrc
+    ```
