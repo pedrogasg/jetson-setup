@@ -88,7 +88,7 @@ For the image and the WIFI we are going to use the [jetcard](https://github.com/
 
 2. Close the previous Jupyter Lab browser tab
 
-3. Open a new terminal and connect to the jetson in ssh wirh the following command and navigate to 
+3. Open a new terminal and connect to the jetson in ssh wirh the following command
 
     ```bash
     ssh jetson@<jetson_ip_address>
@@ -97,7 +97,7 @@ For the image and the WIFI we are going to use the [jetcard](https://github.com/
 
 ## Intalling librealsense and ros
 ---
-### Step 1 Realsense setup
+### Step 1 - Realsense setup
 
 > To install librealsense you only need to use the utility scripts of jetson hacks for the [435D](https://www.jetsonhacks.com/2019/05/07/jetson-nano-realsense-tracking-camera/) or for the [265T](https://www.jetsonhacks.com/2019/05/16/jetson-nano-realsense-depth-camera/) they basically tell you to run the follow commands
 
@@ -119,7 +119,7 @@ For the image and the WIFI we are going to use the [jetcard](https://github.com/
     cd ..
     ```
 
-### Step 2 ROS setup
+### Step 2 - ROS setup
 
 > [ROS](https://github.com/JetsonHacksNano/installROS) and [RealsenseROS](https://github.com/JetsonHacksNano/installRealSenseROS) also have utility scripts you can run the ROS one with the follow commands
 
@@ -130,7 +130,7 @@ For the image and the WIFI we are going to use the [jetcard](https://github.com/
     ./installROS.sh -p ros-melodic-desktop -p ros-melodic-rgbd-launch
     cd ..
     ```
-### Step 3 Realsense ROS setup
+### Step 3 - Realsense ROS setup
 
 > Jetson Hacks provide a script to make a catkin workspace that use catkin_make as the script to install realsense ROS support also catkin tools we going to create the workspace using catkin tools
 
@@ -159,5 +159,57 @@ For the image and the WIFI we are going to use the [jetcard](https://github.com/
 4. Add the workspace to the PATH and the .bashrc file
 
     ```bash
-    echo "source catkin_ws_realsense/devel/setup.bash --extend" >> ~/.bashrc
+    echo "source /home/jetson/catkin_ws_realsense/devel/setup.bash --extend" >> ~/.bashrc
+    ```
+
+## Intalling mavros
+---
+
+1. Create the workspace: unneeded if you already has workspace
+
+    ```bash
+    mkdir -p ~/catkin_ws_mavros/src
+    cd ~/catkin_ws_mavros
+    catkin init
+    wstool init src
+    ```
+2. Install MAVLink
+    > We use the Kinetic reference for all ROS distros as it's not distro-specific and up to date
+
+    ```bash
+    rosinstall_generator --rosdistro melodic mavlink | tee /tmp/mavros.rosinstall
+    ```
+3. Install MAVROS: get source (upstream - released)
+    >  Install latest source
+
+    ```bash
+    rosinstall_generator --upstream-development mavros | tee -a /tmp/mavros.rosinstall
+    ```
+4. Create workspace & deps
+
+    ```bash
+    wstool merge -t src /tmp/mavros.rosinstall
+    wstool update -t src -j4
+    rosdep install --from-paths src --ignore-src -y
+    ```
+5. Install GeographicLib datasets:
+
+    ```bash
+    sudo ./src/mavros/mavros/scripts/install_geographiclib_datasets.sh
+    ```
+
+6. Build source
+
+    ```bash
+    catkin build
+    ```
+7. Add the workspace to the PATH and the .bashrc file
+
+    ```bash
+    echo "source /home/jetson/catkin_ws_mavros/devel/setup.bash --extend" >> ~/.bashrc
+    ```
+8. Set the rights to the tty
+
+    ```bash
+    sudo chmod 666 /dev/ttyACM0
     ```
