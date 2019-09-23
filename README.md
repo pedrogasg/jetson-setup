@@ -99,7 +99,7 @@ For the image and the WIFI we are going to use the [jetcard](https://github.com/
 ---
 ### Step 1 - Realsense setup
 
-> To install librealsense you only need to use the utility scripts of jetson hacks for the [435D](https://www.jetsonhacks.com/2019/05/07/jetson-nano-realsense-tracking-camera/) or for the [265T](https://www.jetsonhacks.com/2019/05/16/jetson-nano-realsense-depth-camera/) they basically tell you to run the follow commands
+> To install librealsense you only need to use the utility scripts of jetson hacks for the [435D](https://www.jetsonhacks.com/2019/05/07/jetson-nano-realsense-tracking-camera/) or for the [265T](https://www.jetsonhacks.com/2019/05/16/jetson-nano-realsense-depth-camera/) they basically tell you to run the follow commands (if you need a newer version see Step 1-2
 
 1. Add a swapfile to jetson
 
@@ -118,6 +118,63 @@ For the image and the WIFI we are going to use the [jetcard](https://github.com/
     ./patchUbuntu.sh
     cd ..
     ```
+
+### Step 1-2 - Realsense setup (solo)
+
+> Right now we are using the version 2.28
+
+1. Add the ubuntu keyserver
+    ```bash
+    sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F42ED6FBAB17C654
+    ```
+
+2. Update the repo
+    ```bash
+    sudo apt update
+    ```
+
+3. Install dependencies
+    ```bash
+    sudo apt install -y wget git libssl-dev libusb-1.0-0-dev pkg-config libgtk-3-dev libglfw3-dev libgl1-mesa-dev libglu1-mesa-dev cmake
+    ```
+
+4. Download librealsense
+
+    ```bash
+    sudo wget https://github.com/IntelRealSense/librealsense/archive/v2.28.0.tar.gz -O librealsense.tar.gz
+    ```
+
+5. Untar librealsense
+
+    ```bash
+    tar xvzf librealsense.tar.gz
+    ```
+
+6. Go to librealsense folder and create the build folder 
+
+    ```bash
+    cd librealsense-2.28.0 && mkdir build && cd build
+    ```
+
+7. Run cmake build
+
+    ```bash
+     cmake ../ -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS:bool=true -DBUILD_WITH_CUDA:bool=true -DCMAKE_CUDA_COMPILER=/usr/local/cuda-10.0/bin/nvcc
+    ```
+
+8. Run Make with 4 cores
+
+    ```bash
+    make -j4
+    ```
+
+9. Install all the tools and libs
+
+    ```bash
+    sudo make install
+    ```
+
+
 
 ### Step 2 - ROS setup
 
@@ -197,7 +254,6 @@ For the image and the WIFI we are going to use the [jetcard](https://github.com/
     ```bash
     sudo ./src/mavros/mavros/scripts/install_geographiclib_datasets.sh
     ```
-
 6. Build source
 
     ```bash
@@ -211,5 +267,5 @@ For the image and the WIFI we are going to use the [jetcard](https://github.com/
 8. Set the rights to the tty
 
     ```bash
-    sudo chmod 666 /dev/ttyACM0
+    sudo chmod 777 /dev/ttyACM0
     ```
