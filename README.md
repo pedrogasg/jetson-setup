@@ -174,6 +174,13 @@ For the image and the WIFI we are going to use the [jetcard](https://github.com/
     sudo make install
     ```
 
+10. Before using you need copy the udev rules for the realsense and restart udevadm
+
+    ```bash
+    cd ..
+    sudo cp config/99-realsense-libusb.rules /etc/udev/rules.d/
+    sudo udevadm control --reload-rules && udevadm trigger
+    ```
 
 
 ### Step 2 - ROS setup
