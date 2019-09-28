@@ -44,7 +44,7 @@ You only need to put the kit together if you want you can follow the tutorials
 
 2. Power on by plugging the powersuply to the jetson
 
-3. Connect the device to a screan and create an user account
+3. Connect the device to a screan and create an user account ``user_name`` and ``user_password``
 
 ### Step 3 - Connect the Jetson to WiFi
 
@@ -74,16 +74,14 @@ You only need to put the kit together if you want you can follow the tutorials
     ```
 ### Step 4 - Connect to the Jetson over WiFi in ssh 
 
-1. Unplug the micro USB cable from the Jetson Nano
+1. Unplug the the Jetson Nano HDMI
 
-2. Close the previous Jupyter Lab browser tab
-
-3. Open a new terminal and connect to the jetson in ssh wirh the following command
+3. Open a new terminal in your main machine and connect to the jetson in ssh wirh the following command
 
     ```bash
-    ssh jetson@<jetson_ip_address>
+    ssh <user_name>@<jetson_ip_address>
     ```
-4. Sign in with the password ``jetson``
+4. Sign in with the password <user_password>
 
 ## Intalling librealsense and ros
 ---
