@@ -28,37 +28,27 @@ You only need to put the kit together if you want you can follow the tutorials
 
 + [For use the barrel adapter](https://www.jetsonhacks.com/2019/04/10/jetson-nano-use-more-power/)
 
-## Image and connection to the wifi
----
 
-For the image and the WIFI we are going to use the [jetcard](https://github.com/NVIDIA-AI-IOT/jetcard) image and almost the same procedure that the [jetracer software](https://github.com/NVIDIA-AI-IOT/jetracer/blob/master/docs/software_setup.md) 
+### Step 1 - Flash micro SD card for the latest version
 
-### Step 1 - Flash micro SD card
-
-1. Download the JetCard SD card image [jetcard_v0p0p0.img](https://drive.google.com/open?id=1wXD1CwtxiH5Mz4uSmIZ76fd78zDQltW_) onto a Windows, Linux or Mac *desktop machine*
-    
-    > You can check it against this [md5sum](https://drive.google.com/open?id=1356ZBrYUWaTgbV50UMB1uCfWrNcd6PEF)
+1. Download the image in the [nvida site](https://developer.nvidia.com/embedded/downloads) not use the sdk manager, that is currently not working right
 
 2. Insert a 32GB+ SD card into the desktop machine
-3. Using [Etcher](https://www.balena.io/etcher/) select ``jetcard_v0p0p0.img`` and flash it onto the SD card
-4. Remove the SD card from the desktop machine
 
-> Please note, the password for the pre-built SD card is ``jetson``
+3. Using [Etcher](https://www.balena.io/etcher/) unzip and select the image downloaded before
 
-### Step 2 - Power on and connect over USB
+
+### Step 2 - Power on and connect
 
 1. Insert the configured SD card into the Jetson Nano module
 
 2. Power on by plugging the powersuply to the jetson
 
-3. Connect your Windows, Linux, or Mac machine to the Jetson Nano via micro USB
-
-4. On your Windows, Linux, or Mac machine, open a browser and navigate to ``192.168.55.1:8888``
-5. Sign in using the default password ``jetson``
+3. Connect the device to a screan and create an user account
 
 ### Step 3 - Connect the Jetson to WiFi
 
-1. Open a terminal in Jupyter Lab by clicking ``File`` -> ``New`` -> ``Terminal``
+1. Open a terminal
 
 2. In the terminal, type the following command to list available WiFi networks, and find the ``ssid_name`` of your network.
 
@@ -97,9 +87,10 @@ For the image and the WIFI we are going to use the [jetcard](https://github.com/
 
 ## Intalling librealsense and ros
 ---
-### Step 1 - Realsense setup
 
-> To install librealsense you only need to use the utility scripts of jetson hacks for the [435D](https://www.jetsonhacks.com/2019/05/07/jetson-nano-realsense-tracking-camera/) or for the [265T](https://www.jetsonhacks.com/2019/05/16/jetson-nano-realsense-depth-camera/) they basically tell you to run the follow commands (if you need a newer version see Step 1-2
+### Step 1-2 - Realsense setup
+
+> Right now we are using the version 2.28
 
 1. Add a swapfile to jetson
 
@@ -110,71 +101,58 @@ For the image and the WIFI we are going to use the [jetcard](https://github.com/
     cd ..
     ```
 
-2. Install librealsense with the utility script
-    ```bash
-    git clone https://github.com/jetsonhacksnano/installLibrealsense
-    cd installLibrealsense
-    ./installLibrealsense.sh -c
-    ./patchUbuntu.sh
-    cd ..
-    ```
-
-### Step 1-2 - Realsense setup (solo)
-
-> Right now we are using the version 2.28
-
-1. Add the ubuntu keyserver
+2. Add the ubuntu keyserver
     ```bash
     sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F42ED6FBAB17C654
     ```
 
-2. Update the repo
+3. Update the repo
     ```bash
     sudo apt update
     ```
 
-3. Install dependencies
+4. Install dependencies
     ```bash
-    sudo apt install -y wget git libssl-dev libusb-1.0-0-dev pkg-config libgtk-3-dev libglfw3-dev libgl1-mesa-dev libglu1-mesa-dev cmake
+    sudo apt install -y wget git libssl-dev libusb-1.0-0-dev pkg-config libgtk-3-dev libglfw3-dev libgl1-mesa-dev libglu1-mesa-dev python3-dev cmake
     ```
 
-4. Download librealsense
+5. Download librealsense
 
     ```bash
     sudo wget https://github.com/IntelRealSense/librealsense/archive/v2.28.0.tar.gz -O librealsense.tar.gz
     ```
 
-5. Untar librealsense
+6. Untar librealsense
 
     ```bash
     tar xvzf librealsense.tar.gz
     ```
 
-6. Go to librealsense folder and create the build folder 
+7. Go to librealsense folder and create the build folder 
 
     ```bash
     cd librealsense-2.28.0 && mkdir build && cd build
     ```
 
-7. Run cmake build
+8. Run cmake build
 
     ```bash
      cmake ../ -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS:bool=true -DBUILD_WITH_CUDA:bool=true -DCMAKE_CUDA_COMPILER=/usr/local/cuda-10.0/bin/nvcc
     ```
 
-8. Run Make with 4 cores
+9. Run Make with 4 cores
 
     ```bash
     make -j4
     ```
 
-9. Install all the tools and libs
+10. Install all the tools and libs
 
     ```bash
     sudo make install
     ```
 
-10. Before using you need copy the udev rules for the realsense and restart udevadm
+11. Before using you need copy the udev rules for the realsense and restart udevadm
 
     ```bash
     cd ..
