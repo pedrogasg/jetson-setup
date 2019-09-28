@@ -245,6 +245,7 @@ You only need to put the kit together if you want you can follow the tutorials
 
     ```bash
     echo "source /home/jetson/catkin_ws_rs/devel/setup.bash --extend" >> ~/.bashrc
+    source ~/.bashrc
     ```
 
 ## Intalling mavros
@@ -291,9 +292,41 @@ You only need to put the kit together if you want you can follow the tutorials
 
     ```bash
     echo "source /home/jetson/catkin_ws_mavros/devel/setup.bash --extend" >> ~/.bashrc
+    source ~/.bashrc
     ```
 8. Set the rights to the tty
 
     ```bash
     sudo chmod 777 /dev/ttyACM0
+    ```
+
+## Intalling tensorflow
+---
+> Right now we are using the version 1.14
+
+1. Installing dependencies
+
+    ```bash
+    sudo apt-get install -y libhdf5-serial-dev hdf5-tools libhdf5-dev zlib1g-dev zip libjpeg8-dev
+    ```
+
+2. Installing pip and python dependencies
+
+    ```bash
+    sudo apt-get install -y python3-pip python3-testresources
+    sudo pip3 install -U pip
+    sudo pip3 install -U numpy grpcio absl-py py-cpuinfo psutil portpicker six mock requests gast h5py astor termcolor protobuf keras-applications keras-preprocessing wrapt google-pasta
+
+    ```
+
+3. Installing official tensorflow for nano, build by Nvidia
+
+    ```bash
+    sudo pip3 install --pre --extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v42 tensorflow-gpu==1.14.0+nv19.7
+    ```
+
+4. Downgrade gast
+    > The new version of gast has removed a constant used in tensorflow so we need to use the version 0.2.2
+    ```bash
+    sudo pip3 install 'gast==0.2.2'
     ```
