@@ -88,7 +88,7 @@ You only need to put the kit together if you want you can follow the tutorials
 ## Intalling librealsense and ros
 ---
 
-### Step 1-2 - Realsense setup
+### Step 1 - Realsense setup
 
 > Right now we are using the version 2.28
 
@@ -162,46 +162,89 @@ You only need to put the kit together if you want you can follow the tutorials
 
 
 ### Step 2 - ROS setup
+> We install ros melodic and the dependencies direclty from the repo
 
-> [ROS](https://github.com/JetsonHacksNano/installROS) and [RealsenseROS](https://github.com/JetsonHacksNano/installRealSenseROS) also have utility scripts you can run the ROS one with the follow commands
-
-1. Install librealsense with the utility script
+1. Add ros source to the deb list
     ```bash
-    git clone https://github.com/JetsonHacksNano/installROS
-    cd installROS
-    ./installROS.sh -p ros-melodic-desktop -p ros-melodic-rgbd-launch
-    cd ..
+    sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
     ```
+
+2. Add the key to the key server
+    ```bash
+    sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654 
+    ```
+
+3. Update apt list
+    ```bash
+    sudo apt-get update
+    ```
+
+4. Install ros desktop and rgbd launch
+    ```bash
+    sudo apt-get install -y ros-melodic-desktop ros-melodic-rgbd-launch
+    ```
+
+5. Install and run rosdep
+    ```bash
+    sudo apt-get install -y python-rosdep
+    sudo rosdep init
+    rosdep update
+    ```
+
+6. Add setup bash to bashrc and source bash rc
+    ```bash
+    echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
+    source ~/.bashrc
+    ```
+
+7. Install dependencies for ros
+    ```bash
+    sudo apt-get install python-rosinstall python-rosinstall-generator python-wstool build-essential python-catkin-tools  -y
+    ```
+
+8. Install dependecies for python3
+    ```bash
+    sudo apt-get -y install python3-pip python3-yaml
+    sudo pip3 install rospkg catkin_pkg
+    ```
+
 ### Step 3 - Realsense ROS setup
 
-> Jetson Hacks provide a script to make a catkin workspace that use catkin_make as the script to install realsense ROS support also catkin tools we going to create the workspace using catkin tools
+> We need to make some modification in realsense ros to use our version of realsense
 
-1. Install catkin tools
-
-    ```bash
-    sudo apt-get install python-catkin-tools python-rosinstall-generator -y
-    ```
-2. Create the workspace for realsense ROS
+1. Create the workspace for realsense ROS
 
     ```bash
-    mkdir -p ~/catkin_ws_realsense/src
-    cd ~/catkin_ws_realsense
+    mkdir -p ~/catkin_ws_rs/src
+    cd ~/catkin_ws_rs
     catkin init
-    cd ..
+    cd src
     ```
-3. Install realsense ROS with the utility script
+
+2. Clone realsense ros and ddynamic reconfigure
+    ```bash
+    git clone https://github.com/pal-robotics/ddynamic_reconfigure
+    git clone https://github.com/IntelRealSense/realsense-ros.git
+    ```
+
+3. Checkout the branch 2.2.8 to go with our version and change CMakelist to works also with the 2.2.8 version
+    ```bash
+    cd realsense-ros/
+    git checkout 2.2.8
+    sed -i 's/find_package(realsense2 2.25.0)/find_package(realsense2 2.28.0)/' realsense2_camera/CMakeLists.txt 
+    cd ../..
+    ```
+
+4. Use catkin to make the package
+    ```bash
+    catkin config -DCATKIN_ENABLE_TESTING=False -DCMAKE_BUILD_TYPE=Release
+    catkin build
+    ```
+
+5. Add the workspace to the PATH and the .bashrc file
 
     ```bash
-    git clone https://github.com/JetsonHacksNano/installRealSenseROS
-    cd installRealSenseROS
-    ./installRealSenseROS.sh catkin_ws_realsense
-    ./setupNano.sh
-    cd ..
-    ```
-4. Add the workspace to the PATH and the .bashrc file
-
-    ```bash
-    echo "source /home/jetson/catkin_ws_realsense/devel/setup.bash --extend" >> ~/.bashrc
+    echo "source /home/jetson/catkin_ws_rs/devel/setup.bash --extend" >> ~/.bashrc
     ```
 
 ## Intalling mavros
