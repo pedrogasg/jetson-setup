@@ -31,7 +31,7 @@ You only need to put the kit together if you want you can follow the tutorials
 
 ### Step 1 - Flash micro SD card for the latest version
 
-1. Download the image in the [nvida site](https://developer.nvidia.com/embedded/downloads) not use the sdk manager, that is currently not working right
+1. Download the image in the [nvida site](https://developer.nvidia.com/embedded/downloads) not use the sdk manager, that is currently not working right know
 
 2. Insert a 32GB+ SD card into the desktop machine
 
@@ -44,9 +44,15 @@ You only need to put the kit together if you want you can follow the tutorials
 
 2. Power on by plugging the powersuply to the jetson
 
-3. Connect the device to a screan and create an user account ``user_name`` and ``user_password``
+3. Without a display plugged the jetson start in [headless mode]( https://www.jetsonhacks.com/2019/08/21/jetson-nano-headless-setup/), you can connect to the jetson with the follow command this will guide you to install ubuntu and create the user and the wifi connection
 
-### Step 3 - Connect the Jetson to WiFi
+    ```bash
+    screen /dev/ttyACM0 115200
+    ```
+
+4. Connect to the jetson through ssh
+
+### Step 3 - Connect the Jetson to WiFi (If the wifi is not working)
 
 1. Open a terminal
 
@@ -72,23 +78,45 @@ You only need to put the kit together if you want you can follow the tutorials
     ```bash
     sudo iw dev wlan0 set power_save off
     ```
+
+### Step 3.1 - Connect the Jetson to WiFi (In wap2 entreprise)
+
+1. Follow the 2 first steps
+
+2. Create WPA2 Entreprise connexion
+
+    ```bash
+    nmcli con add type wifi ifname wlan0 con-name <connexion-name> ssid <ssid_name>
+    nmcli con edit id <connexion-name>
+    set ipv4.method auto
+    set 802-1x.eap peap
+    set 802-1x.phase2-auth mschapv2
+    set 802-1x.identity <user_name>
+    set 802-1x.password <password>
+    set wifi-sec.key-mgmt wpa-eap
+    save
+    activate
+    ```
+3. Continue as step 3
+
+
 ### Step 4 - Connect to the Jetson over WiFi in ssh 
 
-1. Unplug the the Jetson Nano HDMI
+1. Unplug the the Jetson Nano HDMI if you use a display or the micro usb if you use the headless mode
 
-3. Open a new terminal in your main machine and connect to the jetson in ssh wirh the following command
+3. Open a new terminal in your main machine and connect to the jetson in ssh with the following command
 
     ```bash
     ssh <user_name>@<jetson_ip_address>
     ```
 4. Sign in with the password <user_password>
 
-## Intalling librealsense and ros
+## Installing librealsense and ros
 ---
 
 ### Step 1 - Realsense setup
 
-> Right now we are using the version 2.28
+> Right now we are using the version 2.31
 
 1. Add a swapfile to jetson
 
@@ -117,7 +145,7 @@ You only need to put the kit together if you want you can follow the tutorials
 5. Download librealsense
 
     ```bash
-    sudo wget https://github.com/IntelRealSense/librealsense/archive/v2.28.0.tar.gz -O librealsense.tar.gz
+    sudo wget https://github.com/IntelRealSense/librealsense/archive/v2.31.0.tar.gz -O librealsense.tar.gz
     ```
 
 6. Untar librealsense
@@ -129,7 +157,7 @@ You only need to put the kit together if you want you can follow the tutorials
 7. Go to librealsense folder and create the build folder 
 
     ```bash
-    cd librealsense-2.28.0 && mkdir build && cd build
+    cd librealsense-2.31.0 && mkdir build && cd build
     ```
 
 8. Run cmake build
@@ -208,7 +236,7 @@ You only need to put the kit together if you want you can follow the tutorials
 
 ### Step 3 - Realsense ROS setup
 
-> We need to make some modification in realsense ros to use our version of realsense
+> The current master support the version 2.31 of realsence
 
 1. Create the workspace for realsense ROS
 
@@ -225,10 +253,10 @@ You only need to put the kit together if you want you can follow the tutorials
     git clone https://github.com/IntelRealSense/realsense-ros.git
     ```
 
-3. Checkout the branch 2.2.8 to go with our version and change CMakelist to works also with the 2.2.8 version
+3. Checkout the branch 2.2.12 to go with our version and change CMakelist to works also with the 2.2.12 version
     ```bash
     cd realsense-ros/
-    git checkout 2.2.8
+    git checkout 2.2.12
     sed -i 's/find_package(realsense2 2.25.0)/find_package(realsense2 2.28.0)/' realsense2_camera/CMakeLists.txt 
     cd ../..
     ```
@@ -249,7 +277,7 @@ You only need to put the kit together if you want you can follow the tutorials
 ## Intalling mavros
 ---
 
-1. Create the workspace: unneeded if you already has workspace
+1. Create the workspace: unneeded if you already have workspace
 
     ```bash
     mkdir -p ~/catkin_ws_mavros/src
@@ -258,10 +286,10 @@ You only need to put the kit together if you want you can follow the tutorials
     wstool init src
     ```
 2. Install MAVLink
-    > We use the Kinetic reference for all ROS distros as it's not distro-specific and up to date
+    > We can use the melodic reference for all ROS distros as it's not distro-specific and is up to date `--rosdistro melodic` this example use the master
 
     ```bash
-    rosinstall_generator --rosdistro melodic mavlink | tee /tmp/mavros.rosinstall
+    rosinstall_generator --upstream-development mavlink | tee /tmp/mavros.rosinstall
     ```
 3. Install MAVROS: get source (upstream - released)
     >  Install latest source
@@ -292,10 +320,13 @@ You only need to put the kit together if you want you can follow the tutorials
     echo "source /home/jetson/catkin_ws_mavros/devel/setup.bash --extend" >> ~/.bashrc
     source ~/.bashrc
     ```
-8. Set the rights to the tty
+8. Set the rights to the ttyTHS in the udev rules
 
     ```bash
-    sudo chmod 777 /dev/ttyACM0
+    sudo sh -c 'echo "KERNEL==\"ttyTHS*\", MODE=\"0666\""  > /etc/udev/rules.d/55-jetsonserial.rules'
+    systemctl stop nvgetty
+    systemctl disable nvgetty
+    udevadm trigger (or reboot)
     ```
 
 ## Intalling tensorflow
@@ -311,20 +342,15 @@ You only need to put the kit together if you want you can follow the tutorials
 2. Installing pip and python dependencies
 
     ```bash
-    sudo apt-get install -y python3-pip python3-testresources
-    sudo pip3 install -U pip
-    sudo pip3 install -U numpy grpcio absl-py py-cpuinfo psutil portpicker six mock requests gast h5py astor termcolor protobuf keras-applications keras-preprocessing wrapt google-pasta
+    sudo apt-get install -y python3-pip 
+    sudo pip3 install -U pip testresources setuptools
+    sudo pip3 install -U numpy==1.16.1 future==0.17.1 mock==3.0.5 h5py==2.9.0 keras_preprocessing==1.0.5 keras_applications==1.0.8 gast==0.2.2 enum34 futures protobuf
 
     ```
 
 3. Installing official tensorflow for nano, build by Nvidia
 
     ```bash
-    sudo pip3 install --pre --extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v42 tensorflow-gpu==1.14.0+nv19.7
-    ```
+    $ sudo pip3 install --pre --extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v43 tensorflow-gpu
 
-4. Downgrade gast
-    > The new version of gast has removed a constant used in tensorflow so we need to use the version 0.2.2
-    ```bash
-    sudo pip3 install 'gast==0.2.2'
     ```
